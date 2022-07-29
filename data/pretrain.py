@@ -1,5 +1,4 @@
 import numpy as np
-import h5py
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,6 +9,9 @@ from torch.nn import Linear
 from torch.utils.data import Dataset
 from sklearn.cluster import KMeans
 from evaluation import eva
+import sys
+sys.path.insert(0, '..')
+from utils import load_cora
 
 #torch.cuda.set_device(3)
 
@@ -82,10 +84,10 @@ def pretrain_ae(model, dataset, y):
             x_bar, z = model(x)
             loss = F.mse_loss(x_bar, x)
             print('{} loss: {}'.format(epoch, loss))           
-            kmeans = KMeans(n_clusters=4, n_init=20).fit(z.data.cpu().numpy())
+            kmeans = KMeans(n_clusters=7, n_init=20).fit(z.data.cpu().numpy())
             eva(y, kmeans.labels_, epoch)
 
-        torch.save(model.state_dict(), 'dblp1.pkl')
+        torch.save(model.state_dict(), 'cora.pkl')
 
 model = AE(
         n_enc_1=500,
@@ -94,11 +96,10 @@ model = AE(
         n_dec_1=2000,
         n_dec_2=500,
         n_dec_3=500,
-        n_input=334,
+        n_input=1433,
         n_z=10,).cuda()
 
-x = np.loadtxt('dblp.txt', dtype=float)
-y = np.loadtxt('dblp_label.txt', dtype=int)
+_, x, y = load_cora('./')
 
 dataset = LoadDataset(x)
 pretrain_ae(model, dataset, y)

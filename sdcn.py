@@ -210,6 +210,11 @@ if __name__ == "__main__":
         args.n_clusters = 6
         args.n_input = 3703
 
+    if args.name == 'cora':
+        args.k = None
+        args.n_clusters = 7
+        args.n_input = 1433
+
 
     print(args)
     train_sdcn(dataset)
